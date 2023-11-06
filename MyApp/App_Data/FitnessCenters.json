@@ -1,0 +1,110 @@
+[
+  {
+    "Id": 1,
+    "Name": "Fitnes Centar 1",
+    "Address": {
+      "Ulica": "Okrugiceva",
+      "Broj": "7",
+      "Mesto": "Petrovaradin",
+      "PostanskiBroj": "21000"
+    },
+    "OpeningYear": 2001,
+    "Owner": "vladan123",
+    "MonMembership": 223,
+    "YMembership": 12345,
+    "OneDayPrice": 432,
+    "GroupTrPrice": 239,
+    "OneTrWCoach": 235,
+    "Deleted": false
+  },
+  {
+    "Id": 2,
+    "Name": "Fitnes Centar 2",
+    "Address": {
+      "Ulica": "Okriceva",
+      "Broj": "2",
+      "Mesto": "Paradin",
+      "PostanskiBroj": "21000"
+    },
+    "OpeningYear": 2020,
+    "Owner": "karolina",
+    "MonMembership": 223,
+    "YMembership": 12326,
+    "OneDayPrice": 4,
+    "GroupTrPrice": 23,
+    "OneTrWCoach": 235,
+    "Deleted": false
+  },
+  {
+    "Id": 3,
+    "Name": "Aitnes Centar 3",
+    "Address": {
+      "Ulica": "Vladike Cirica",
+      "Broj": "17",
+      "Mesto": "Novi Sad",
+      "PostanskiBroj": "21000"
+    },
+    "OpeningYear": 2010,
+    "Owner": "vladan123",
+    "MonMembership": 2222,
+    "YMembership": 12123,
+    "OneDayPrice": 432,
+    "GroupTrPrice": 236,
+    "OneTrWCoach": 243,
+    "Deleted": false
+  },
+  {
+    "Id": 0,
+    "Name": "Fitnes 1",
+    "Address": {
+      "Ulica": "Djordja Servickog",
+      "Broj": "16",
+      "Mesto": "Novi Sad",
+      "PostanskiBroj": " 21000"
+    },
+    "OpeningYear": 2012,
+    "Owner": "vladan123",
+    "MonMembership": 2390,
+    "YMembership": 22898,
+    "OneDayPrice": 450,
+    "GroupTrPrice": 340,
+    "OneTrWCoach": 700,
+    "Deleted": false
+  },
+  {
+    "Id": 1284382293,
+    "Name": "Gladiator",
+    "Address": {
+      "Ulica": "Aranj Janjosa",
+      "Broj": "16a",
+      "Mesto": "Novi Sad",
+      "PostanskiBroj": "21000"
+    },
+    "OpeningYear": 2018,
+    "Owner": "vladan123",
+    "MonMembership": 2223,
+    "YMembership": 33377,
+    "OneDayPrice": 123,
+    "GroupTrPrice": 234,
+    "OneTrWCoach": 766,
+    "Deleted": false
+  },
+  {
+    "Id": 103056976,
+    "Name": "galska",
+    "Address": {
+      "Ulica": "smala",
+      "Broj": "asdjao",
+      "Mesto": "13",
+      "PostanskiBroj": "231"
+    },
+    "OpeningYear": 2020,
+    "Owner": "vladan123",
+    "MonMembership": 2121,
+    "YMembership": 32121,
+    "OneDayPrice": 313,
+    "GroupTrPrice": 311,
+    "OneTrWCoach": 312,
+    "Deleted": true
+  }
+]

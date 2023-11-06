@@ -1,0 +1,112 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            background-image: url("./slika.jpg");
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: cover;
+            filter: blur(0.2px);
+            font-weight: bold;
+            text-align: center
+        }
+        #click {
+            background: center;
+            font-weight: bold;
+            position: fixed;
+            left: 2px;
+            top: 2px
+        }
+        #submit{
+            background:center;
+            color:black;
+            font-weight:bold
+        }
+    </style>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="Scripts/jquery-3.3.1.js"></script>
+    <script type="text/javascript">
+        var niz = new Array();
+        niz = location.search.split('&');
+        var korisnickoIme = niz[0].substring(10);
+        var id = niz[1];
+
+        $(document).ready(function () {
+            vratiPodatke();
+            $('#click').click(function (e) {
+                //e.preventDefault();
+                window.location.href = "index.html?username=" + korisnickoIme;
+            });
+
+            $('#fcentar').submit(function (e) {
+                e.preventDefault();
+                let name = $('#ime').val();
+                let adresa = $('#adresa').val();
+                let godina = $('#godina').val();
+                let mesecna = $('#mesecna').val();
+                let godisnja = $('#godisnja').val();
+                let jednodnevni = $('#jednodnevni').val();
+                let grupni = $('#grupni').val();
+                let personalni = $('#personalni').val();
+
+                if (name.length === 0 || adresa.length === 0 || godina.length === 0 || mesecna.length === 0 || godisnja.length === 0 || jednodnevni.length === 0 || grupni.length === 0 || personalni.length === 0) {
+                    alert('Sva polja moraju biti popunjena!');
+                    return;
+                }
+
+                $.ajax({
+                    url: "api/vlasnik/IzmenaCentra",
+                    type: "POST",
+                    data: { 'id': id, 'ime': name, 'adresa': adresa, 'godina': godina, 'mesecna': mesecna, 'godisnja': godisnja, 'jednodnevni': jednodnevni, 'grupni': grupni, 'personalni': personalni, 'koIme': korisnickoIme },
+                    success: function (response) {
+                        if (response === null) {
+                            alert('Ne postoji!');
+                            return;
+                        }
+                        alert('Fitnes centar je uspesno izmenjen!');
+                        window.location.href = "vlasnik.html?username=" + korisnickoIme;
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                });
+            });
+        });
+        function vratiPodatke() {
+            $.ajax({
+                url: "api/vlasnik/Lista",
+                type: "GET",
+                data: { 'id': id },
+                success: function (response) {
+                    $('#ime').val(response.Name);
+                    $('#adresa').val(response.Address.Ulica + ',' + response.Address.Broj + ',' + response.Address.Mesto + ',' + response.Address.PostanskiBroj);
+                    $('#godina').val(response.OpeningYear);
+                    $('#mesecna').val(response.MonMembership);
+                    $('#godisnja').val(response.YMembership);
+                    $('#jednodnevni').val(response.OneDayPrice);
+                    $('#grupni').val(response.GroupTrPrice);
+                    $('#personalni').val(response.OneTrWCoach);
+                }, error: function (xhr, ajaxOptions, thrownError) {
+                    alert('Error: ' + xhr.status);
+                }
+            });
+        };
+    </script>
+</head>
+<body>
+    <h3>Izmenite fitnes centar:</h3>
+    <form id="fcentar">
+        <label>Ime: </label><input type="text" id="ime" /><br />
+        <label>Adresa: </label><input type="text" id="adresa" /><br />
+        <label>Godina otvaranja: </label><input type="number" id="godina" /><br />
+        <label>Mesecna clanarina: </label><input type="number" id="mesecna" /><br />
+        <label>Godisnja clanarina: </label><input type="number" id="godisnja" /><br />
+        <label>Jednodnevni trening: </label><input type="number" id="jednodnevni" /><br />
+        <label>Jedan grupni trening: </label><input type="number" id="grupni" /><br />
+        <label>Personalni: </label><input type="number" id="personalni" /><br />
+        <input type="submit" value="Izmeni" id="submit" />
+    </form><br />
+    <button id="click">Nazad</button>
+</body>
+</html>

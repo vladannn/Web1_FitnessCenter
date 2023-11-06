@@ -1,0 +1,153 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            background-image: url("./slika.jpg");
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: cover;
+            filter: blur(0.2px);
+            font-weight: bold;
+            text-align: center
+        }
+
+        a {
+            color: black;
+            font-family: Century;
+            border: double;
+            align-content: center;
+            position: fixed;
+            left: 2px;
+            top: 2px
+        }
+
+        #submit {
+            background: center;
+            color: black;
+            font-weight: bold
+        }
+    </style>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="Scripts/jquery-3.3.1.js"></script>
+    <script type="text/javascript">
+        var korisnickoIme = location.search.substring(10);
+        $(document).ready(function () {
+            okoIzmene();
+
+            $('#submit').click(function (e) {
+                e.preventDefault();
+                let name = $('#ime').val();
+                let lastname = $('#prezime').val();
+                let username = $('#korisnickoIme').val();
+                let email = $('#email').val();
+                let password = $('#password').val();
+                let datetime = $('#datetime').val();
+                let gender = $('#gender').val();
+
+                if (name.length === 0 || lastname.length === 0 || username.length === 0 || email.length === 0 || password.length === 0 || datetime.length === 0 || gender.length === 0) {
+                    alert('Obavezno je da se popuni svako polje!');
+                    window.location.href = "izmenaKorisnika.html?username=" + korisnickoIme;
+                    return;
+                }
+
+                /*if (!email.includes(".+@globex\.com")) {
+                    alert('Email nije pravilno unesen!');
+                    return;
+                }*/
+
+                var forma1 = $(this);
+                $.ajax({
+                    url: "api/korisnici/Izmena",
+                    type: "POST",
+                    data: { 'ime': name, 'prezime': lastname, 'korisnickoIme': username, 'email': email, 'password': password, 'datetime': datetime, 'gender': gender, 'korIme': korisnickoIme },
+                    success: function (response) {
+
+                        if (response === null) {
+                            alert('Korisnik sa datim korisnickim imenom vec postoji!');
+                            window.location.href = "izmenaKorisnika.html?username=" + korisnickoIme;
+                            return;
+                        }
+                        korisnickoIme = response.Username;
+                        let date = response.DateTime;
+                        let obj = date.split("T");
+                        let first = obj[0];
+                        let partsOfDate = first.split("-");
+                        let year = partsOfDate[0];
+                        let month = partsOfDate[1];
+                        let day = partsOfDate[2];
+                        let dateAndTime = day + "/" + month + "/" + year;
+                        $('#ime').val(response.FirstName);
+                        $('#prezime').val(response.LastName);
+                        $('#password').val(response.Password);
+                        $('#korisnickoIme').val(response.Username);
+                        $('#email').val(response.Email);
+                        $('#gender').val(response.Gender);
+                        $('#datetime').val(dateAndTime);
+                        window.location.href = "izmenaKorisnika.html?username=" + korisnickoIme;
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                });
+
+            });
+
+            $('.click').click(function (e) {
+                e.preventDefault();
+                location.href = "index.html?username=" + korisnickoIme;
+            }
+
+            );
+        });
+        function okoIzmene() {
+            $.ajax({
+                url: "api/korisnici/DetaljiKorisnik",
+                type: "POST",
+                data: { 'ime': korisnickoIme },
+                success: function (response) {
+                    popuniPolja(response);
+                }, error: function (xhr, ajaxOptions, thrownError) {
+                    alert('Error: ' + xhr.status);
+                }
+            });
+        }
+        function popuniPolja(response) {
+            let date = response.DateTime;
+            let obj = date.split("T");
+            let first = obj[0];
+            let partsOfDate = first.split("-");
+            let year = partsOfDate[0];
+            let month = partsOfDate[1];
+            let day = partsOfDate[2];
+            let dateAndTime = month + "/" + day + "/" + year;
+
+            $('#ime').val(response.FirstName);
+            $('#prezime').val(response.LastName);
+            $('#password').val(response.Password);
+            $('#korisnickoIme').val(response.Username);
+            $('#email').val(response.Email);
+            $('#gender').val(response.Gender);
+            $('#datetime').val(first);
+        }
+    </script>
+</head>
+<body>
+    <h1>Izmena korisnika:</h1>
+    <form id="forma">
+        <label>Ime: </label><input type="text" id="ime" /><br />
+        <label>Prezime: </label><input type="text" id="prezime" /><br />
+        <label>Sifra: </label><input type="text" id="password" /><br />
+        <label>Korisnicko ime: </label><input type="text" id="korisnickoIme" /><br />
+        <label>Email: </label><input type="email"  id="email" /><br />
+        <label>Pol: </label><select name="gender" id="gender">
+            <option>Muski</option>
+            <option>Zenski</option>
+        </select><br />
+        <label>Datum rodjenja: </label><input type="date" name="datetime" id="datetime" /><br /><br />
+        <input type="submit" value="Izmeni" id="submit" />
+    </form>
+        
+    <a href="index.html" class="click">Nazad</a>
+</body>
+</html>

@@ -1,0 +1,243 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            background-image: url("./slika.jpg");
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: cover;
+            filter: blur(0.2px);
+            font-weight: bold;
+        }
+
+        #click {
+            background: center;
+            font-weight: bold;
+        }
+
+        #content {
+            text-align: center;
+        }
+
+        h4 {
+            text-align: left
+        }
+
+        #posetioci {
+            background: center;
+            font-weight: bold;
+            background-color: wheat
+        }
+
+        #izmeni {
+            background: center;
+            font-weight: bold;
+            background-color: wheat
+        }
+
+        #izbrisi {
+            background: center;
+            font-weight: bold;
+            background-color: wheat
+        }
+
+        button {
+            background: center;
+            font-weight: bold;
+            text-align: left
+        }
+
+        #submit {
+            background: center;
+            color: black;
+            font-weight: bold
+        }
+    </style>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="Scripts/jquery-3.3.1.js"></script>
+    <script type="text/javascript">
+        var korisnickoIme = location.search.substring(10);
+        $(document).ready(function () {
+            vrati();
+            $('#click').click(function (e) {
+                window.location.href = "index.html?username=" + korisnickoIme;
+            });
+
+            $('#istorija').click(function (e) {
+                window.location.href = "prethodniTreninzi.html?username=" + korisnickoIme;
+            });
+
+            $(document).on('click', '#izmeni', function (e) {
+                var id = $(this).attr('name');
+                window.location.href = "izmenaTreninga.html?username=" + korisnickoIme + "&" + id;
+            });
+
+            $(document).on('click', '#posetioci', function (e) {
+                var id = $(this).attr('name');
+                $.ajax({
+                    url: "api/trener/Posetioci",
+                    type: "GET",
+                    data: { 'ime': korisnickoIme, 'id': id },
+                    success: function (response) {
+                        if (response === null) {
+                            $('#posete').html('<p>Trening nema posetioce!</p>');
+                        } else {
+                            var tekst = '<p>Posetioci:</p>';
+                            for (elem in response) {
+                                tekst += '<p>' + response[elem] + '</p>';
+                            }
+                            $('#posete').html(tekst);
+                        }
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                });
+            });
+
+            $(document).on('click', '#izbrisi', function (e) {
+                //e.preventDefault();
+                var id = $(this).attr('name');
+                $.ajax({
+                    url: "api/trener/Brisanje",
+                    type: "DELETE",
+                    data: { 'ime': korisnickoIme, 'id': id },
+                    success: function (response) {
+                        if (response == true) {
+                            alert('Brisanje je uspesno');
+                            window.location.href = 'trener.html?username=' + korisnickoIme;
+                        } else {
+                            alert('Trening ima posetioce, pa ga je nemoguce obrisati!');
+                            window.location.href = 'trener.html?username=' + korisnickoIme;
+                        }
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                });
+            });
+
+            $('#forma').submit(function (e) {
+                e.preventDefault();
+                let ime = $('#ime').val();
+                let tip = $('#tip').val();
+                let trajanje = $('#trajanje').val();
+                let max = $('#max').val();
+                let vreme = $('#vreme').val();
+
+                if (ime.length === 0 || tip.length === 0 || trajanje.length === 0 || max.length === 0 || vreme.length === 0) {
+                    alert('Sva polja moraju biti popunjena!');
+                    return;
+                }
+
+                $.ajax({
+                    url: "api/trener/Dodaj",
+                    type: "POST",
+                    data: { 'koIme': korisnickoIme, 'ime': ime, 'tip': tip, 'trajanje': trajanje, 'max': max, 'vreme': vreme },
+                    success: function (response) {
+                        if (response == true) {
+                            alert('Trening je uspesno dodat!');
+                            window.location.href = 'trener.html?username=' + korisnickoIme;
+                        }
+                        else {
+                            alert('Vreme mora da bude bar tri dana od danasnjeg!');
+                            window.location.href = 'trener.html?username=' + korisnickoIme;
+                        }
+
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                })
+            });
+
+        });
+        function vrati() {
+            $.ajax({
+                url: "api/trener/SpisakGT",
+                type: "GET",
+                data: { 'ime': korisnickoIme },
+                success: function (response) {
+                    if (response === null) {
+                        $('#content').html('<p>Trener nema isplaniranih treninga u buducnosti!</p>');
+                    } else {
+                        kreiranjeTabele(response);
+                    }
+                }, error: function (xhr, ajaxOptions, thrownError) {
+                    alert('Error: ' + xhr.status);
+                }
+            });
+        };
+
+        function kreiranjeTabele(response) {
+            let tableFitness = '<table border="1">';
+            tableFitness += '<tr><th>Ime</th><th>Tip treninga</th><th>Mesto odrzavanja</th><th>Trajanje</th><th>Datum i vreme</th><th>Maksimalan broj</th><th>Broj prijavljenih</th><th></th></tr>';
+            for (elemnt in response) {
+                let uloga = '';
+                if (response[elemnt].TrainingType === 'Yoga') {
+                    uloga = 'Yoga';
+                }
+                else if (response[elemnt].TrainingType === 'LessMillsTone') {
+                    uloga = 'Less Mills Tone';
+                }
+                else if (response[elemnt].TrainingType === 'BodyPump') {
+                    uloga = 'Body Pump';
+                }
+                var date = response[elemnt].DateTime;
+                var obj = date.split("T");
+                var first = obj[0];
+                var second = obj[1];
+                var partsOfDate = first.split("-");
+                var year = partsOfDate[0];
+                var month = partsOfDate[1];
+                var day = partsOfDate[2];
+                var obj1 = second.split(":");
+                var hrs = obj1[0];
+                var min = obj1[1];
+                var dateAndTime = day + "/" + month + "/" + year + "   " + hrs + ":" + min + "h";
+
+                let numberOfVisitors = response[elemnt].Users;
+                if (numberOfVisitors === null) {
+                    numberOfVisitors = 0;
+                }
+                else {
+                    numberOfVisitors = numberOfVisitors.length;
+                }
+
+                let finess = '<td>' + response[elemnt].Name + '</td>';
+                finess += '<td>' + uloga + '</td>';
+                finess += '<td>' + response[elemnt].Place.Name + '</td>';
+                finess += '<td>' + response[elemnt].Duration + '</td>';
+                finess += '<td>' + dateAndTime + '</td>';
+                finess += '<td>' + response[elemnt].MaxNumber + '</td>';
+                finess += '<td>' + numberOfVisitors + '</td>';
+                finess += '<td><button id="izmeni" name="' + response[elemnt].Id + '">Izmeni</button>';
+                finess += '<td><button id="izbrisi" name="' + response[elemnt].Id + '">Izbrisi</button>';
+                finess += '<td><button id="posetioci" name="' + response[elemnt].Id + '">Posetioci</button>';
+                tableFitness += '<tr>' + finess + '</tr>';
+            }
+            tableFitness += '</table>';
+            $('#content').html(tableFitness);
+        };
+    </script>
+</head>
+<body>
+    <h4>Dodavanje novog treninga:</h4>
+    <form id="forma">
+        <label>Ime: </label><input type="text" id="ime" /><br />
+        <label>Tip treninga: </label>
+        <select name="tip" id="tip">
+            <option>Yoga</option>
+            <option>Less Mills Tone</option>
+            <option>Body Pump</option>
+        </select><br />
+        <label>Trajanje treninga: </label><input type="number" id="trajanje" placeholder="u minutama" /><br />
+        <label>Datum treninga: </label><input type="datetime-local" id="vreme" /><br />
+        <label>Maksimalan broj posetilaca: </label><input type="number" id="max" /><br />
+        <input type="submit" value="Dodaj trening" id="submit"/>
+    </form><br/>
+    <div id="content"></div><br/>
+    <button id="istorija">Prethodni treninzi</button><br/>
+    <div id="posete"></div><br />
+    <button id="click">Nazad</button>
+</body>
+</html>

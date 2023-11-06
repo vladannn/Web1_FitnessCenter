@@ -1,0 +1,437 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            background-image: url("./slika.jpg");
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: cover;
+            filter: blur(0.2px);
+            color:black;
+            font-weight:bold
+                
+        }
+        #content2{
+            color:black
+        }
+        a {
+            color: black;
+            font-family: Century;
+            border: double;
+            align-content: center;
+            background-color:wheat
+                
+        }
+        button{
+            background-color:wheat;
+            color:black;
+            font-weight:bold
+        }
+        #unesi{
+            background-color:wheat
+        }
+    </style>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="Scripts/jquery-3.3.1.js"></script>
+    <script type="text/javascript">
+        var uloga = "";
+        var korisnickoIme = location.search.substring(10);
+        $(document).ready(function () {
+            if (korisnickoIme.length < 1) {
+                prikazCentara();
+                prikazGT();
+                prikazK();
+            }
+            else {
+                poseta();
+            }
+           
+            $(".nazad").click(function (e) {
+                if (korisnickoIme.length<1) {
+                    window.location.href ="index.html";
+                }
+                else {
+                    e.preventDefault();
+                    window.location.href = "index.html?username=" + korisnickoIme;
+                }
+            });
+
+
+
+            $(document).on('submit', '#razlog', function (e) {
+                e.preventDefault();
+                let ocena = $('#ocena').val();
+                let ostavljen = $('#ostavljen').val();
+                if (ocena.length === 0 || ostavljen.length === 0) {
+                    alert('Popunite oba polja ako zelite da ostavite komentar!');
+                    return;
+                }
+                else if (ocena < 1 || ocena > 5) {
+                    alert('Ocena mora da ima vrednost izmedju 1 i 5');
+                    return;
+                } else {
+                    $.ajax({
+                        url: "api/fitnesscenters/OstaviKomentar",
+                        type: "POST",
+                        data: { 'korIme': korisnickoIme, 'ocena': ocena, 'kom': ostavljen },
+                        success: function (response) {
+                            if (response === true) {
+                                alert('Komentar je ostavljen!');
+                            } else {
+                                alert('Komentar nije ostavljen, jer korisnik nije imao trening u ovoj teretani');
+                            }
+                        }, error: function (xhr, ajaxOptions, thrownError) {
+                            alert('Error: ' + xhr.status);
+                        }
+
+                    });
+                }
+            });
+
+            $(document).on('click', '#prihvati', function (e) {
+                let br = $(this).attr('name');
+                $.ajax({
+                    url: "api/fitnesscenters/Potvrda",
+                    type: "PUT",
+                    data: { 'id': br, 'korIme': korisnickoIme },
+                    success: function (response) {
+                        if (response === true) {
+                            alert('Komentar je odobren!');
+                        } else {
+                            alert('Neuspesno!');
+                        }
+
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                });
+            });
+
+            $(document).on('click', '#odbij', function (e) {
+                let br = $(this).attr('name');
+                $.ajax({
+                    url: "api/fitnesscenters/Odbij",
+                    type: "PUT",
+                    data: { 'id': br, 'korIme': korisnickoIme },
+                    success: function (response) {
+                        if (response === true) {
+                            alert('Komentar je odbijen!');
+                        } else {
+                            alert('Neuspesno!');
+                        }
+
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                });
+            });
+
+            $(document).on('click', '#dugmence', function (e) {
+                let br = $(this).attr('name');
+                $.ajax({
+                    url: "api/posetilac/Prijava",
+                    type: "POST",
+                    data: { 'id': br, 'korIme': korisnickoIme },
+                    success: function (response) {
+                        if (response === true) {
+                            alert('Prijavili ste se na trening!');
+                        } else {
+                            alert('Ne mozete da se prijavite na trening!');
+                        }
+
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                });
+            });
+
+        });
+        function prikazGT() {
+            $.ajax({
+                url: "api/fitnesscenters/SpisakGT",
+                type: "GET",
+                success: function (response) {
+                    if (response===null) {
+                        let porucica = "<p>Nema treninga za datu teretanu</p>";
+                        $('#content1').html(porucica);
+                    } else {
+                        kreiranjeTabele(response);
+                    }
+                }, error: function (xhr, ajaxOptions, thrownError) {
+                    alert('Error: ' + xhr.status);
+                }
+            });
+        };
+
+        function poseta() {
+            $.ajax({
+                url: "api/posetilac/Korisnik",
+                type: "GET",
+                data: { 'ime': korisnickoIme },
+                success: function (response) {
+                    if (response.Role === 'Visitor') {
+                        prikazCentara();
+                        prikazGrupnih();
+                        ostaviKomentar();
+                        prikazK();
+                    }
+                    else if (response.Role === 'Owner')
+                    {
+                        $.ajax({
+                            url: "api/fitnesscenters/PraviVlasnik",
+                            type: "GET",
+                            data: { 'ime': korisnickoIme },
+                            success: function (response) {
+                                if (response === true) {
+
+                                    prikazCentara();
+                                    prikazGT();
+                                    prikazSvih();
+                                } else {
+                                    prikazCentara();
+                                    prikazGT();
+                                    prikazK();
+                                }
+                            }, error: function (xhr, ajaxOptions, thrownError) {
+                                alert('Error: ' + xhr.status);
+                            }
+                        });
+                    }
+                    else {
+                        prikazCentara();
+                        prikazGT();
+                        prikazK();
+                    }
+                }, error: function (xhr, ajaxOptions, thrownError) {
+                    alert('Error: ' + xhr.status);
+                }
+            });
+        };
+
+        function prikazCentara() {
+            $.ajax({
+                url: "api/fitnesscenters/Lista",
+                type: "GET",
+                success: function (response) {
+                    kreiranjePolja(response);
+                }, error: function (xhr, ajaxOptions, thrownError) {
+                    alert('Error: ' + xhr.status);
+                }
+            });
+        };
+
+        
+
+        function prikazGrupnih() {
+            $.ajax({
+                url: "api/fitnesscenters/SpisakGrupnih",
+                type: "GET",
+                success: function (response) {
+                    if (response === null) {
+                        $('#content1').html('<h4>Nema podataka!</h4>');
+                    } else {
+                        kreiranjeTabele2(response)
+                    }
+                }, error: function (xhr, ajaxOptions, thrownError) {
+                    alert('Error: ' + xhr.status);
+                }
+            });
+        };
+
+        function ostaviKomentar() {
+            let komentar = '<form id="razlog"><label>Ostavi komentar: </label><input type="text" id="ostavljen"/><br/>';
+            komentar += '<label>Unesi ocenu: </label><input type="number" id="ocena" name="ocena" placeholder="izmedju 1 i 5"/><br/>';
+            komentar += '<input type="submit" id="unesi" value="Posalji"></form>';
+            $('#ostavite').html(komentar);
+        };
+
+        function prikazK() {
+            $.ajax({
+                url: "api/fitnesscenters/SpisakK",
+                type: "GET",
+                success: function (response) {
+                    kreiranjeKomentara(response);
+                }, error: function (xhr, ajaxOptions, thrownError) {
+                    alert('Error: ' + xhr.status);
+                }
+            })
+        };
+
+        function prikazSvih() {
+            $.ajax({
+                url: "api/fitnesscenters/SpisakSvih",
+                type: "GET",
+                success: function (response) {
+                    kreiranjeKomentara2(response);
+                }, error: function (xhr, ajaxOptions, thrownError) {
+                    alert('Error: ' + xhr.status);
+                }
+            })
+        };
+
+        function kreiranjeKomentara2(response) {
+            if (response.length <= 0) {
+                let oki = "<p>Nema dostupnih komentara za dati fitnes centar!</p>";
+                $('#content2').html(oki);
+                //return;
+            } else { 
+                let tekst = '';
+                let odgovor = '';
+                for (elementi in response) {
+                    if (response[elementi].Available == true) {
+                        odgovor = 'vidljiv';
+                    }
+                    else {
+                        odgovor = 'nevidljiv';
+                    }
+                    tekst += '<p>Korisnicko ime: ' + response[elementi].Name + '</p>';
+                    tekst += '<p>Komentar: ' + response[elementi].Text + '</p>';
+                    tekst += '<p>Ocena: ' + response[elementi].Grade + '</p>';
+                    tekst += '<button id="prihvati" name="' + response[elementi].Id + '">Prihvati</button>&nbsp';
+                    tekst += '<button id="odbij" name="' + response[elementi].Id + '">Odbij</button><br/>';
+                }
+                //tekst += '<input type="submit" id="submit" value="Posalji" /></form>';
+                $('#content2').html(tekst);
+            }
+        };
+
+        function kreiranjeKomentara(response) {
+            if (response.length<=0) {
+                let oki = "<p>Nema dostupnih komentara za dati fitnes centar!</p>";
+                $('#content2').html(oki);
+                //return;
+            } else {
+                let tekst = "";
+                for (elementi in response) {
+                    tekst += '<p>Korisnicko ime: ' + response[elementi].Name + '</p>';
+                    tekst += '<p>Komentar: ' + response[elementi].Text + '</p>';
+                    tekst += '<p>Ocena: ' + response[elementi].Grade + '</p>';
+                }
+                $('#content2').html(tekst);
+            }
+        };
+
+        function kreiranjeTabele2(response) {
+            let tableFitness = '<table border="1">';
+            tableFitness += '<tr><th>Ime</th><th>Tip treninga</th><th>Teretana</th><th>Trajanje</th><th>Datum i vreme</th><th>Maksimalan broj clanova</th><th>Broj prijavljenih clanova</th></tr>';
+            for (elemnt in response) {
+                let tip = response[elemnt].TrainingType;
+                if (tip === 'LessMillsTone') {
+                    tip = 'Less Mills Tone';
+                }
+                else if (tip === 'BodyPump') {
+                    tip = 'Body Pump';
+                }
+                else if (tip === 'Yoga') {
+                    tip = 'Yoga';
+                }
+                let numberOfVisitors = response[elemnt].Users;
+                if (numberOfVisitors === null) {
+                    numberOfVisitors = 0;
+                }
+                else {
+                    numberOfVisitors = numberOfVisitors.length;
+                }
+                let date = response[elemnt].DateTime;
+                let obj = date.split("T");
+                let first = obj[0];
+                let second = obj[1];
+                let partsOfDate = first.split("-");
+                let year = partsOfDate[0];
+                let month = partsOfDate[1];
+                let day = partsOfDate[2];
+                let obj1 = second.split(":");
+                let hrs = obj1[0];
+                let min = obj1[1];
+                let dateAndTime = day + "/" + month + "/" + year + "   " + hrs + ":" + min + "h";
+                let finess = '<td>' + response[elemnt].Name + '</td>';
+                finess += '<td>' + tip + '</td>';
+                finess += '<td>' + response[elemnt].Place.Name + '</td>';
+                finess += '<td>' + response[elemnt].Duration + '</td>';
+                finess += '<td>' + dateAndTime + '</td>';
+                finess += '<td>' + response[elemnt].MaxNumber + '</td>';
+                finess += '<td>' + numberOfVisitors + '</td>';
+                finess += '<td><button id="dugmence" name="' + response[elemnt].Id + '">Prijavi se</button></td>';
+                tableFitness += '<tr>' + finess + '</tr>';
+            }
+            tableFitness += '</table>';
+            $('#content1').html(tableFitness);
+        };
+
+        function kreiranjeTabele(response) {
+            let tableFitness = '<table border="1">';
+            tableFitness += '<tr><th>Ime</th><th>Tip treninga</th><th>Teretana</th><th>Trajanje</th><th>Datum i vreme</th><th>Maksimalan broj clanova</th><th>Broj prijavljenih clanova</th></tr>';
+            for (elemnt in response) {
+                let tip = response[elemnt].TrainingType;
+                if (tip === 'LessMillsTone') {
+                    tip = 'Less Mills Tone';
+                }
+                else if (tip === 'BodyPump') {
+                    tip = 'Body Pump';
+                }
+                else if (tip === 'Yoga') {
+                    tip = 'Yoga';
+                }
+                let numberOfVisitors = response[elemnt].Users;
+                if (numberOfVisitors === null) {
+                    numberOfVisitors = 0;
+                }
+                else {
+                    numberOfVisitors = numberOfVisitors.length;
+                }
+                let date = response[elemnt].DateTime;
+                let obj = date.split("T");
+                let first = obj[0];
+                let second = obj[1];
+                let partsOfDate = first.split("-");
+                let year = partsOfDate[0];
+                let month = partsOfDate[1];
+                let day = partsOfDate[2];
+                let obj1 = second.split(":");
+                let hrs = obj1[0];
+                let min = obj1[1];
+                let dateAndTime = day + "/" + month + "/" + year + "   " + hrs + ":" + min + "h";
+                let finess = '<td>' + response[elemnt].Name + '</td>';
+                finess += '<td>' + tip + '</td>';
+                finess += '<td>' + response[elemnt].Place.Name + '</td>';
+                finess += '<td>' + response[elemnt].Duration + '</td>';
+                finess += '<td>' + dateAndTime + '</td>';
+                finess += '<td>' + response[elemnt].MaxNumber + '</td>';
+                finess += '<td>' + numberOfVisitors + '</td>';
+                tableFitness += '<tr>' + finess + '</tr>';
+            }
+            tableFitness += '</table>';
+            $('#content1').html(tableFitness);
+        };
+
+        function kreiranjePolja(response) {
+            /*if (response.Owner == '') {
+                var obj = "nema";
+            }
+            else {
+                obj = response.Owner.Username;
+            }*/
+            let informacije = '<p>Ime:&nbsp' + response.Name + '</p>';
+            informacije += '<p>Adresa:&nbsp' + response.Address.Ulica + ',' + response.Address.Broj + ',' + response.Address.Mesto + ',' + response.Address.PostanskiBroj + '</p>'
+            informacije += '<p>Godina otvaranja:&nbsp' + response.OpeningYear + '</p>';
+            informacije += '<p>Vlasnik:&nbsp' + response.Owner + '</p>';
+            informacije += '<p>Mesecna clanarina:&nbsp' + response.MonMembership + '</p>';
+            informacije += '<p>Godisnja clanarina:&nbsp' + response.YMembership + '</p>';
+            informacije += '<p>Jednodnevna clanarina:&nbsp' + response.OneDayPrice + '</p>';
+            informacije += '<p>Cena grupnog treninga:&nbsp' + response.GroupTrPrice + '</p>';
+            informacije += '<p>Cena treninga sa trenerom:&nbsp' + response.OneTrWCoach + '</p>';
+            $('#content').html(informacije);
+        };
+    </script>
+</head>
+<body>
+    <h1>Sve informacije o izabranom fitnes centru:</h1>
+    <div id="content"></div><br/>
+    <div id="content1"></div><br/>
+    <div id="ostavite"></div><br />
+    <div id="content2"></div><br/>
+    <a href="index.html" class="nazad">Nazad</a>
+</body>
+</html>

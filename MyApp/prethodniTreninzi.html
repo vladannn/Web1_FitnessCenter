@@ -1,0 +1,346 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            background-image: url("./slika.jpg");
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: cover;
+            filter: blur(0.2px);
+            font-weight: bold;
+        }
+
+        button {
+            background: center;
+            font-weight: bold
+        }
+
+        #posetioci {
+            background: center;
+            font-weight: bold;
+            background-color: wheat
+        }
+
+        input[type=submit] {
+            background: center;
+            font-weight: bold;
+        }
+    </style>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="Scripts/jquery-3.3.1.js"></script>
+    <script type="text/javascript">
+        var korisnickoIme = location.search.substring(10);
+        var godina = -1;
+        //var provera = false;
+        $(document).ready(function () {
+            vrati();
+            $('#click').click(function (e) {
+                window.location.href = "trener.html?username=" + korisnickoIme;
+            });
+
+            $(document).on('click', '#posetioci', function (e) {
+                var id = $(this).attr('name');
+                $.ajax({
+                    url: "api/trener/Posetioci",
+                    type: "GET",
+                    data: { 'ime': korisnickoIme, 'id': id },
+                    success: function (response) {
+                        if (response === null) {
+                            $('#posete').html('<p>Trening nema posetioce!</p>');
+                        } else {
+                            var tekst = '<p>Posetioci:</p>';
+                            for (elem in response) {
+                                tekst += '<p>' + response[elem] + '</p>';
+                            }
+                            $('#posete').html(tekst);
+                        }
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                });
+            });
+
+            $('#sort1').click(function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "api/trener/NazivRastuce",
+                    type: "GET",
+                    data: { 'koIme': korisnickoIme },
+                    success: function (response) {
+                        if (response === null) {
+                            $('#content').html('<p>Nema podataka!</p>');
+                        } else {
+                            alert('Rastuce po nazivu!');
+                            kreiranjeTabele(response);
+                        }
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                })
+            });
+
+            $('#sort2').click(function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "api/trener/NazivOpadajuce",
+                    type: "GET",
+                    data: { 'koIme': korisnickoIme },
+                    success: function (response) {
+                        if (response === null) {
+                            $('#content').html('<p>Nema podataka!</p>');
+                        } else {
+                            alert('Opadajuce po nazivu!');
+                            kreiranjeTabele(response);
+                        }
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                })
+            });
+
+            $('#sort3').click(function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "api/trener/TipRastuce",
+                    type: "GET",
+                    data: { 'koIme': korisnickoIme },
+                    success: function (response) {
+                        if (response === null) {
+                            $('#content').html('<p>Nema podataka!</p>');
+                        } else {
+                            alert('Rastuce po tipu treninga!');
+                            kreiranjeTabele(response);
+                        }
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                })
+            });
+
+            $('#sort4').click(function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "api/trener/TipOpadajuce",
+                    type: "GET",
+                    data: { 'koIme': korisnickoIme },
+                    success: function (response) {
+                        if (response === null) {
+                            $('#content').html('<p>Nema podataka!</p>');
+                        } else {
+                            alert('Opadajuce po tipu treninga!');
+                            kreiranjeTabele(response);
+                        }
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                })
+            });
+
+            $('#sort5').click(function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "api/trener/DatumRastuce",
+                    type: "GET",
+                    data: { 'koIme': korisnickoIme },
+                    success: function (response) {
+                        if (response === null) {
+                            $('#content').html('<p>Nema podataka!</p>');
+                        } else {
+                            alert('Rastuce po datumu odrzavanja treninga!');
+                            kreiranjeTabele(response);
+                        }
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                })
+            });
+
+            $('#sort6').click(function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "api/trener/DatumOpadajuce",
+                    type: "GET",
+                    data: { 'koIme': korisnickoIme },
+                    success: function (response) {
+                        if (response === null) {
+                            $('#content').html('<p>Nema podataka!</p>');
+                        } else {
+                            alert('Opadajuce po datumu odrzavanja treninga!');
+                            kreiranjeTabele(response);
+                        }
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                })
+            });
+
+            $('#pretraga').submit(function (e) {
+                e.preventDefault();
+                var godina = -1;
+                let ime = $('#ime').val();
+                let tip = $('#tip').val();
+                var vreme = $('#vreme').val();
+                var vreme1 = $('#vreme1').val();
+                var date1 = new Date(vreme);
+                var date2 = new Date(vreme1);
+                var prom1 = date1.getFullYear();
+                var prom2 = date2.getFullYear();
+
+                if (ime.length === 0 && vreme.length === 0 && vreme1.length === 0 && tip === '(empty)') {
+                    alert('Popunite bar jedno polje!');
+                    return;
+                }
+
+                $.ajax({
+                    url: "api/trener/Godina",
+                    type: "GET",
+                    data: { 'koIme': korisnickoIme },
+                    success: function (response) {
+                        godina = response.OpeningYear;
+                        if ((prom1.length < 4 || prom1.length > 4) && prom2.length === 0 && prom1.length !== 0) {
+                            alert('Godina mora da ima 4 cifre samo!');
+                            return;
+                        }
+                        else if ((prom2.length < 4 || prom2.length > 4) && prom1.length === 0 && prom2.length !== 0) {
+                            alert('Godina mora da ima 4 cifre samo!');
+                            return;
+                        }
+                        else if ((prom1 < godina || prom1 > 2050) && prom2.length === 0 && prom1.length !== 0) {
+                            alert('Godina mora da krene od godine otvaranja fitnes centra do 2050!');
+                            return;
+                        }
+                        else if ((prom2 < godina || prom2 > 2050) && prom1.length === 0 && prom2.length !== 0) {
+                            alert('Godina mora da krene od godine otvaranja fitnes centra do 2050!');
+                            return;
+                        }
+                        else if (((prom2.length < 4 || prom2.length > 4) || (prom1.length < 4 || prom1.length > 4)) && (prom1.length !== 0 && prom1.length !== 0)) {
+                            alert('Godina mora da ima 4 cifre samo!');
+                            return;
+                        }
+                        else if (((prom1 < godina || prom1 > 2050) || (prom2 < godina || prom2 > 2050)) && (prom2.length !== 0 && prom1.length !== 0)) {
+                            alert('Godina mora da krene od godine otvaranja fitnes centra do 2050!');
+                            return;
+                        } else {
+                            $.ajax({
+                                url: "api/trener/Pretraga",
+                                type: "POST",
+                                data: { 'ime': ime, 'koIme': korisnickoIme, 'tip': tip, 'vreme': prom1, 'vreme1': prom2, 'jedan': vreme, 'dva': vreme1 },
+                                success: function (response) {
+                                    if (response === null) {
+                                        $('#content').html('<p>Nema rezultata</p>');
+                                    }
+                                    else {
+                                        kreiranjeTabele(response);
+                                    }
+                                    //window.location.href == "prethodniTreninzi.html?username=" + korisnickoIme;
+                                }, error: function (xhr, ajaxOptions, thrownError) {
+                                    alert('Error: ' + xhr.status);
+                                }
+                            });
+                        }
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                });
+                
+                
+            });
+        });
+
+        
+        function vrati() {
+            $.ajax({
+                url: "api/trener/Spisak",
+                type: "GET",
+                data: { 'ime': korisnickoIme },
+                success: function (response) {
+                    if (response === null) {
+                        let meh = '<p>Trener nije imao treninge u proslosti!</p>';
+                        $('#content').html(meh);
+                        
+                    } else {
+                        kreiranjeTabele(response);
+                    }
+                }, error: function (xhr, ajaxOptions, thrownError) {
+                    alert('Error: ' + xhr.status);
+                }
+            });
+        };
+
+        function kreiranjeTabele(response) {
+            let tableFitness = '<table align="center" border="1">';
+            tableFitness += '<tr><th>Ime</th><th>Tip treninga</th><th>Mesto odrzavanja</th><th>Trajanje</th><th>Datum i vreme</th><th>Maksimalan broj</th><th>Broj prijavljenih</th><th></th></tr>';
+            for (elemnt in response) {
+                let uloga = '';
+                if (response[elemnt].TrainingType === 'Yoga') {
+                    uloga = 'Yoga';
+                }
+                else if (response[elemnt].TrainingType === 'LessMillsTone') {
+                    uloga = 'Less Mills Tone';
+                }
+                else if (response[elemnt].TrainingType === 'BodyPump') {
+                    uloga = 'Body Pump';
+                }
+                var date = response[elemnt].DateTime;
+                var obj = date.split("T");
+                var first = obj[0];
+                var second = obj[1];
+                var partsOfDate = first.split("-");
+                var year = partsOfDate[0];
+                var month = partsOfDate[1];
+                var day = partsOfDate[2];
+                var obj1 = second.split(":");
+                var hrs = obj1[0];
+                var min = obj1[1];
+                var dateAndTime = day + "/" + month + "/" + year + "   " + hrs + ":" + min + "h";
+
+                let broj = response[elemnt].Users;
+                if (broj === null) {
+                    broj = 0;
+                }
+                else {
+                    broj = broj.length;
+                }
+
+                let finess = '<td>' + response[elemnt].Name + '</td>';
+                finess += '<td>' + uloga + '</td>';
+                finess += '<td>' + response[elemnt].Place.Name + '</td>';
+                finess += '<td>' + response[elemnt].Duration + '</td>';
+                finess += '<td>' + dateAndTime + '</td>';
+                finess += '<td>' + response[elemnt].MaxNumber + '</td>';
+                finess += '<td>' + broj + '</td>';
+                finess += '<td><button id="posetioci" name="' + response[elemnt].Id + '">Posetioci</button>';
+                tableFitness += '<tr>' + finess + '</tr>';
+            }
+            tableFitness += '</table>';
+            $('#content').html(tableFitness);
+        };
+    </script>
+</head>
+<body>
+    <div id="content"></div><br />
+    <h3>Pretraga: </h3>
+    <form id="pretraga">
+        <label>Ime: </label><input type="text" id="ime" /><br />
+        <label>Tip treninga: </label>
+        <select name="tip" id="tip">
+            <option>Yoga</option>
+            <option>Less Mills Tone</option>
+            <option>Body Pump</option>
+            <option selected>(empty)</option>
+        </select><br />
+        <label>Datum treninga: Od</label><input type="datetime-local" id="vreme" /><label>do </label><input type="datetime-local" id="vreme1" /><br />
+        <input type="submit" value="Pretrazi" id="submit" />
+    </form>
+    <button id="sort1">Sortiraj po nazivu rastuce</button>
+    <button id="sort2">Sortiraj po nazivu opadajuce</button><br />
+    <button id="sort3">Sortiraj po tipu treninga rastuce</button>
+    <button id="sort4">Sortiraj po tipu treninga opadajuce</button><br />
+    <button id="sort5">Sortiraj po datumu treninga rastuce</button>
+    <button id="sort6">Sortiraj po datumu treninga opadajuce</button><br />
+    <div id="posete"></div><br />
+    <button id="click">Nazad</button>
+</body>
+</html>

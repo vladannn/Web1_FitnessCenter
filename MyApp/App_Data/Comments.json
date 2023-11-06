@@ -1,0 +1,66 @@
+[
+  {
+    "Id": 1,
+    "Name": "sanjaa",
+    "FitnessCenter": 3,
+    "Text": "Pristojnog izgleda, ali nije potpuno opremljena.",
+    "Grade": 3.0,
+    "Available": true
+  },
+  {
+    "Id": 2,
+    "Name": "sanjaa",
+    "FitnessCenter": 3,
+    "Text": "Oki puno pos!",
+    "Grade": 5.0,
+    "Available": true
+  },
+  {
+    "Id": 3,
+    "Name": "tina",
+    "FitnessCenter": 1,
+    "Text": "Okej je!",
+    "Grade": 3.0,
+    "Available": true
+  },
+  {
+    "Id": 1664125687,
+    "Name": "tina",
+    "FitnessCenter": 2,
+    "Text": "Dobar",
+    "Grade": 4.0,
+    "Available": false
+  },
+  {
+    "Id": 76354023,
+    "Name": "tina",
+    "FitnessCenter": 1,
+    "Text": "Dobra je, nekada zagusljivo!",
+    "Grade": 4.0,
+    "Available": true
+  },
+  {
+    "Id": 195579442,
+    "Name": "tina",
+    "FitnessCenter": 1,
+    "Text": "slatko",
+    "Grade": 4.0,
+    "Available": true
+  },
+  {
+    "Id": 1481159428,
+    "Name": "tina",
+    "FitnessCenter": 2,
+    "Text": "dfs",
+    "Grade": 2.0,
+    "Available": false
+  },
+  {
+    "Id": 1529639652,
+    "Name": "sanjaa",
+    "FitnessCenter": 1,
+    "Text": "dfs",
+    "Grade": 3.0,
+    "Available": false
+  }
+]

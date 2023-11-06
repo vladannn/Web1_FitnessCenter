@@ -1,0 +1,89 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            background-image: url("./slika.jpg");
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: cover;
+            filter: blur(0.2px);
+            font-weight: bold;
+            text-align: center
+        }
+
+        a {
+            color: black;
+            font-family: Century;
+            border: double;
+            align-content: center;
+            position: fixed;
+            left: 2px;
+            top: 2px
+        }
+
+    </style>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="Scripts/jquery-3.3.1.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var korisnickoIme = location.search.substring(10);
+            $.ajax({
+                url: "api/korisnici/DetaljiKorisnik",
+                type: "POST",
+                data: { 'ime': korisnickoIme },
+                success: function (response) {
+                    kreiranjePolja(response);
+                }, error: function (xhr, ajaxOptions, thrownError) {
+                    alert('Error: ' + xhr.status);
+                }
+            });
+
+            $('.click').click(function (e) {
+                e.preventDefault();
+                location.href = "index.html?username=" + korisnickoIme;
+            }
+
+            )
+        });
+
+        function kreiranjePolja(response) {
+            var date = response.DateTime;
+            var obj = date.split("T");
+            var first = obj[0];
+            var partsOfDate = first.split("-");
+            var year = partsOfDate[0];
+            var month = partsOfDate[1];
+            var day = partsOfDate[2];
+            var dateAndTime = day + "/" + month + "/" + year;
+            var uloga = "";
+            if (response.Role == 'Owner') {
+                uloga = 'Vlasnik';
+            }
+            else if (response.Role == 'Visitor') {
+                uloga = 'Posetilac';
+            }
+            else {
+                uloga = 'Trener';
+            }
+            let informacije = '<p>Ime:&nbsp' + response.FirstName + '</p>';
+            informacije += '<p>Prezime:&nbsp' + response.LastName + '</p>';
+            informacije += '<p>Sifra:&nbsp' + response.Password + '</p>';
+            informacije += '<p>Korisnicko ime:&nbsp' + response.Username + '</p>';
+            informacije += '<p>Pol:&nbsp' + response.Gender + '</p>';
+            informacije += '<p>Email:&nbsp' + response.Email + '</p>';
+            informacije += '<p>Datum rodjenja:&nbsp' + dateAndTime + '</p>';
+            informacije += '<p>Uloga:&nbsp' + uloga + '</p>';
+            $('#content').html(informacije);
+        };
+
+
+    </script>
+</head>
+<body>
+    <h1>Informacije o korisniku:</h1>
+    <div id="content"></div><br />
+    <a href="index.html" class="click">Nazad</a>
+</body>
+</html>

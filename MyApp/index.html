@@ -1,0 +1,371 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            background-image: url("./slika.jpg");
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: cover;
+            filter: blur(0.2px);
+            font-weight:bold
+        }
+        a {
+            color: black;
+            font-family: Century;
+            border: double;
+            align-content:center
+        }
+        h1{
+            text-align:center
+        }
+        table{
+            text-align:center;
+            border-color:black;
+            border-style:dotted
+        }
+        #prijavaIRegistracija{
+            position:absolute;
+            top: 5px;
+            left: 3px;
+
+        }
+        #pretragaN{
+            background:center;
+            color:black;
+            font-weight:bold
+        }
+        input{
+            color:white
+        }
+        button{
+            color:black;
+            background:center;
+            font-weight:bold;
+        }
+
+        #content{
+            text-align:center
+        }
+
+        form{
+            position:fixed;
+            bottom:4px;
+            right:7px;
+            color:wheat
+        }
+        input[type=text]{
+            color:black
+        }
+        input[type=number]
+        {
+            color:black
+        }
+        #detalji{
+            background-color:wheat
+        }
+    </style>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="Scripts/jquery-3.3.1.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var korisnickoIme = location.search.substring(10);
+            if (!location.search.substring(1).length > 0) {
+                vrati();
+                prikazPiR();
+            }
+            else
+            {
+                dugmiciZaPrijavu();
+                vrati();
+            }
+
+            $(document).on('click', '#dugmeProfil', function () {
+                window.location.href = "prikazKorisnika.html?username=" + korisnickoIme;
+            });
+
+            $(document).on('click', '#dugmeOdjavi', function () {
+                window.location.href = "index.html";
+            });
+
+            $('#dugmeUredi').click(function (e) {
+                window.location.href="izmenaKorisnika.html?username=" + korisnickoIme;
+            });
+
+            $('#dugmeUloga').click(function (e) {
+                $.ajax({
+                    url: "api/vlasnik/Uloga",
+                    type: "GET",
+                    data: { 'koIme': korisnickoIme },
+                    success: function (response) {
+                        
+                        if (response.Role === 'Owner') {
+                            window.location.href = "vlasnik.html?username=" + korisnickoIme;
+                        }
+                        else if (response.Role === 'Coach') {
+                            window.location.href = "trener.html?username=" + korisnickoIme;
+                        }
+                        else if (response.Role === 'Visitor')
+                        {
+                            window.location.href = "posetilac.html?username=" + korisnickoIme;
+                        }
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                })
+            });
+
+            $('#load-fitness').click(function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "api/fitnesscenters/Vrati",
+                    type: "GET",
+                    success: function (response) {
+                        alert('Rastuce po nazivu!');
+                        kreiranjeTabele(response);
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                })
+            });
+
+            $('#load-fitness1').click(function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "api/fitnesscenters/OpadajuceNaziv",
+                    type: "GET",
+                    success: function (response) {
+                        alert('Opadajuce po nazivu!');
+                        kreiranjeTabele(response);
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                })
+            });
+
+            $('#load-fitness2').click(function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "api/fitnesscenters/RastuceAdresa",
+                    type: "GET",
+                    success: function (response) {
+                        alert('Rastuce po adresi!');
+                        kreiranjeTabele(response);
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                })
+            });
+
+            $('#load-fitness3').click(function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "api/fitnesscenters/OpadajuceAdresa",
+                    type: "GET",
+                    success: function (response) {
+                        alert('Opadajuce po adresi!');
+                        kreiranjeTabele(response);
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                })
+            });
+
+            $('#load-fitness4').click(function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "api/fitnesscenters/RastuceGodina",
+                    type: "GET",
+                    success: function (response) {
+                        alert('Rastuce po godini otvaranja!');
+                        kreiranjeTabele(response);
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                })
+            });
+
+            $('#load-fitness5').click(function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "api/fitnesscenters/OpadajuceGodina",
+                    type: "GET",
+                    success: function (response) {
+                        if (response === null) {
+                            $('#content').html('<p>Nema podataka!</p>');
+                        } else {
+                            alert('Opadajuce po godini otvaranja!');
+                            kreiranjeTabele(response);
+                        }
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                })
+            });
+
+            $(document).on('click', '#detalji', function (e) {
+                //* e.preventDefault();
+                var id = $(this).attr('name');
+                var dugme = $(this);
+                $.ajax({
+                    url: '/api/fitnesscenters/Detalji',
+                    type: 'POST',
+                    data: { 'name': id },
+                    success: function (result) {
+                        window.location.href = "details.html?username=" + korisnickoIme;
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                });
+            });
+
+
+            $('#forma1').submit(function (e) {
+                e.preventDefault();
+
+
+                let name = $('#name').val();
+                let adresa = $('#adresa').val();
+                let godina1 = $('#godina1').val();
+                let godina2 = $('#godina2').val();
+
+                if (name.length === 0 && adresa.length === 0 && godina1.length === 0 && godina2.length === 0) {
+                    alert('Popunite bar jedno polje!');
+                    return;
+                }
+
+                if ((godina1.length < 4 || godina1.length > 4) && godina2.length === 0 && godina1.length !== 0) {
+                    alert('Godina mora da ima 4 cifre samo!');
+                    return;
+                }
+                else if ((godina2.length < 4 || godina2.length > 4) && godina1.length === 0 && godina2.length !== 0) {
+                    alert('Godina mora da ima 4 cifre samo!');
+                    return;
+                }
+                else if ((godina1 < 1980 || godina1 > 2100) && godina2.length === 0 && godina1.length !== 0) {
+                    alert('Godina mora da bude u okviru vrednosti od 1980 do 2100');
+                    return;
+                }
+                else if ((godina2 < 1980 || godina2 > 2100) && godina1.length === 0 && godina2.length !== 0) {
+                    alert('Godina mora da bude u okviru vrednosti od 1980 do 2100');
+                    return;
+                }
+                else if (((godina2.length < 4 || godina2.length > 4) || (godina1.length < 4 || godina1.length > 4)) && (godina1.length !== 0 && godina2.length !== 0)) {
+                    alert('Godina mora da ima 4 cifre samo!');
+                    return;
+                }
+                else if (((godina1 < 1980 || godina1 > 2100) || (godina2 < 1980 || godina2 > 2100)) && (godina2.length !== 0 && godina1.length !== 0)) {
+                    alert('Godina mora da bude u okviru vrednosti od 1980 do 2100');
+                    return;
+                }
+
+
+                var forma = $(this);
+
+                $.ajax({
+                    url: "/api/fitnesscenters/Pretraga",
+                    type: "POST",
+                    data: forma.serialize(),
+                    success: function (result) {
+                        if (result == null || result==='') {
+                            var poruka = 'Nema podataka sa datim parametrima';
+                            $('#content').html(poruka);
+                            $('#name').val('');
+                            $('#adresa').val('');
+                            $('#godina1').val('');
+                            $('#godina2').val('');
+
+                            return;
+                        }
+                        alert('Found it!');
+                        let tableOfFitnes = '<table align="center" border="1">';
+                        tableOfFitnes += '<tr><th>Ime</th><th>Adresa</th><th>Godina otvaranja</th><th></th></tr>';
+                        for (elemen in result) {
+                            let fitnes = '<td>' + result[elemen].Name + '</td>';
+                            fitnes += '<td>' + result[elemen].Address.Ulica + "," + result[elemen].Address.Broj + "," + result[elemen].Address.Mesto + "," + result[elemen].Address.PostanskiBroj + '</td>';
+                            fitnes += '<td>' + result[elemen].OpeningYear + '</td>';
+                            fitnes += '<td><button id="detalji" name="' + result[elemen].Id + '">Detalji</button>';
+                            tableOfFitnes += '<tr>' + fitnes + '</tr>';
+                        }
+                        tableOfFitnes += '</table>';
+                        $('#content').html(tableOfFitnes);
+                        $('#name').val('');
+                        $('#adresa').val('');
+                        $('#godina1').val('');
+                        $('#godina2').val('');
+
+
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+
+                })
+            });
+            
+        });
+
+        function prikazPiR() {
+            let podaci = '<a href="Login.html">Prijavi se</a>&nbsp';
+            podaci += '<a href="register.html">Registracija</a>';
+            $('#prijavaIRegistracija').html(podaci);
+        }
+
+        function dugmiciZaPrijavu() {
+            var kreiranjeDugmica = '<button id="dugmeProfil">Informacije o korisniku</button>';
+            kreiranjeDugmica += '<button id="dugmeUredi">Uredi profil</button>';
+            kreiranjeDugmica += '<button id="dugmeOdjavi">Odjavi se</button>';
+            kreiranjeDugmica += '<button id="dugmeUloga">Pregled i izmena</button>';
+            $('#nakonPrijave').html(kreiranjeDugmica);
+        }
+
+
+        function vrati() {
+            $.ajax({
+                url: "api/fitnesscenters/Vrati",
+                type: "GET",
+                success: function (response) {
+                    kreiranjeTabele(response);
+                }, error: function (xhr, ajaxOptions, thrownError) {
+                    alert('Error: ' + xhr.status);
+                }
+            });
+        }
+
+        function kreiranjeTabele(response) {
+            let tableFitness = '<table align="center" border="1">';
+            tableFitness += '<tr><th>Ime</th><th>Adresa</th><th>Godina otvaranja</th><th></th></tr>';
+            for (elemnt in response) {
+                let finess = '<td>' + response[elemnt].Name + '</td>';
+                finess += '<td>' + response[elemnt].Address.Ulica + "," + response[elemnt].Address.Broj + "," + response[elemnt].Address.Mesto + "," + response[elemnt].Address.PostanskiBroj + '</td>';
+                finess += '<td>' + response[elemnt].OpeningYear + '</td>';
+                finess += '<td><button id="detalji" name="' + response[elemnt].Id + '">Detalji</button>';
+                tableFitness += '<tr>' + finess + '</tr>';
+            }
+            tableFitness += '</table>';
+            $('#content').html(tableFitness);
+        };
+                
+    </script>
+</head>
+<body>
+    <h1>Fitnes centri</h1>
+    <div id="nakonPrijave"></div><br/>
+    <div id="content"></div><br />
+    <form id="forma1">
+        Pretraga po nazivu: <input type="text" name="name" id="name" /><br />
+        Pretraga po adresi: <input type="text" name="adresa" id="adresa" /><br />
+        Pretraga po godinama: Od: <input type="number" name="godina1" id="godina1" /> do <input type="number" name="godina2" id="godina2" /><br />
+        <input type="submit" value="Pretrazi" id="pretragaN" />
+    </form><br />
+    <button id="load-fitness">Sortiraj po nazivu rastuce</button><br />
+    <button id="load-fitness1">Sortiraj po nazivu opadajuce</button><br />
+    <button id="load-fitness2">Sortiraj po adresi rastuce</button><br />
+    <button id="load-fitness3">Sortiraj po adresi opadajuce</button><br />
+    <button id="load-fitness4">Sortiraj po godini otvaranja rastuce</button><br />
+    <button id="load-fitness5">Sortiraj po godini otvaranja opadajuce</button><br />
+    <div id="prijavaIRegistracija">
+    </div>
+</body>
+</html>

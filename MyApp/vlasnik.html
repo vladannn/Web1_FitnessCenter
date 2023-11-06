@@ -1,0 +1,229 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            background-image: url("./slika.jpg");
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: cover;
+            filter: blur(0.2px);
+            font-weight: bold;
+        }
+
+        #click {
+            background-color: wheat;
+            font-weight: bold;
+            color:black
+        }
+
+        #content {
+            text-align: center;
+        }
+
+        h2 {
+            text-align: center
+        }
+
+        #forma{
+            text-align:right
+        }
+
+        h4{
+            text-align:right
+        }
+
+        #izmeni {
+            background: center;
+            font-weight: bold;
+            background-color: wheat
+        }
+
+        #izbrisi {
+            background: center;
+            font-weight: bold;
+            background-color: wheat
+        }
+
+        #dodaj {
+            background: center;
+            font-weight: bold;
+            background-color: wheat
+        }
+
+        #submit {
+            background-color: wheat;
+            color: black;
+            font-weight: bold
+        }
+
+        #predaj {
+            color: black;
+            font-weight: bold;
+            background-color:wheat
+        }
+    </style>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="Scripts/jquery-3.3.1.js"></script>
+    <script type="text/javascript">
+        var korisnickoIme = location.search.substring(10);
+        $(document).ready(function () {
+            var korisnickoIme = location.search.substring(10);
+            vrati();
+
+            $(document).on('click', '#dodaj', function (e) {
+                //* e.preventDefault();
+                var id = $(this).attr('name');
+                window.location.href = "registracijaTrenera.html?username=" + korisnickoIme + "&" + id;
+            });
+
+            $('#click').click(function (e) {
+                //e.preventDefault();
+                window.location.href = "index.html?username=" + korisnickoIme;
+            });
+
+            $(document).on('click', '#izmeni', function (e) {
+                //* e.preventDefault();
+                var id = $(this).attr('name');
+                window.location.href = "izmenaFitnesa.html?username=" + korisnickoIme + "&" + id;
+            });
+
+            $(document).on('click', '#izbrisi', function (e) {
+                //e.preventDefault();
+                var id = $(this).attr('name');
+                $.ajax({
+                    url: "api/vlasnik/Brisanje",
+                    type: "DELETE",
+                    data: { 'ime': korisnickoIme, 'id': id },
+                    success: function (response) {
+                        if (response == true) {
+                            alert('Brisanje je uspesno');
+                            window.location.href = 'vlasnik.html?username=' + korisnickoIme;
+                        } else {
+                            alert('Brisanje nije uspelo jer postoje grupni treninzi koji ce se odrzati u buducnosti!');
+                            window.location.href = 'vlasnik.html?username=' + korisnickoIme;
+                        }
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                });
+            });
+
+            $('#forma').submit(function (e) {
+                e.preventDefault();
+                let polje = $('#polje').val();
+                if (polje.length === 0) {
+                    alert('Morate da popunite polje korisnickim imenom trenera!');
+                    return;
+                }
+
+                $.ajax({
+                    url: "api/vlasnik/Blokiranje",
+                    type: "DELETE",
+                    data: { 'polje': polje, 'fom': korisnickoIme },
+                    success: function (response) {
+                        if (response == true){
+                            alert('Trener je uspesno izbrisan!');
+                            window.location.href = 'vlasnik.html?username=' + korisnickoIme;
+                        }
+                        else {
+                            alert('Ne postoji trener sa tim korisnickim imenom!');
+                            window.location.href = 'vlasnik.html?username=' + korisnickoIme;
+                            //return;
+                        }
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                })
+            });
+
+            $('#fcentar').submit(function (e) {
+                e.preventDefault();
+                let name = $('#ime').val();
+                let adresa = $('#adresa').val();
+                let godina = $('#godina').val();
+                let mesecna = $('#mesecna').val();
+                let godisnja = $('#godisnja').val();
+                let jednodnevni = $('#jednodnevni').val();
+                let grupni = $('#grupni').val();
+                let personalni = $('#personalni').val();
+
+                if (name.length === 0 || adresa.length === 0 || godina.length === 0 || mesecna.length === 0 || godisnja.length === 0 || jednodnevni.length === 0 || grupni.length === 0 || personalni.length === 0) {
+                    alert('Sva polja moraju biti popunjena!');
+                    return;
+                }
+
+                $.ajax({
+                    url: "api/vlasnik/DodavanjeCentra",
+                    type: "POST",
+                    data: { 'koIme': korisnickoIme, 'ime': name, 'adresa': adresa, 'godina': godina, 'mesecna': mesecna, 'godisnja': godisnja, 'jednodnevni': jednodnevni, 'grupni': grupni, 'personalni': personalni },
+                    success: function (response) {
+                        alert('Fitnes centar je uspesno dodat!');
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                });
+            });
+            
+
+        });
+
+        function vrati() {
+            $.ajax({
+                url: "api/vlasnik/SpisakCentara",
+                type: "POST",
+                data: { 'ime': korisnickoIme },
+                success: function (response) {
+                    kreiranjeTabele(response);
+                }, error: function (xhr, ajaxOptions, thrownError) {
+                    alert('Error: ' + xhr.status);
+                }
+            });
+        };
+
+        function kreiranjeTabele(response) {
+            let tableFitness = '<table align="center" border="1">';
+            tableFitness += '<tr><th>Ime</th><th>Adresa</th><th>Godina otvaranja</th><th>Mesecna clanarina</th><th>Godisnja clanarina</th><th>Jednodnevna</th><th>Jedan grupni trening</th><th>Personalni trening</th><th></th></tr>';
+            for (elemnt in response) {
+                let finess = '<td>' + response[elemnt].Name + '</td>';
+                finess += '<td>' + response[elemnt].Address.Ulica + "," + response[elemnt].Address.Broj + "," + response[elemnt].Address.Mesto + "," + response[elemnt].Address.PostanskiBroj + '</td>';
+                finess += '<td>' + response[elemnt].OpeningYear + '</td>';
+                finess += '<td>' + response[elemnt].MonMembership + '</td>';
+                finess += '<td>' + response[elemnt].YMembership + '</td>';
+                finess += '<td>' + response[elemnt].OneDayPrice + '</td>';
+                finess += '<td>' + response[elemnt].GroupTrPrice + '</td>';
+                finess += '<td>' + response[elemnt].OneTrWCoach + '</td>';
+                finess += '<td><button id="izmeni" name="' + response[elemnt].Id + '">Izmeni</button>';
+                finess += '<td><button id="dodaj" name="' + response[elemnt].Id + '">Dodaj trenera</button>';
+                finess += '<td><button id="izbrisi" name="' + response[elemnt].Id + '">Izbrisi</button>';
+                tableFitness += '<tr>' + finess + '</tr>';
+            }
+            tableFitness += '</table>';
+            $('#content').html(tableFitness);
+        };
+    </script>
+</head>
+<body>
+    <h2>Spisak fitnes centara datog vlasnika:</h2>
+    <div id="content"></div><br/>
+    <h3>Dodaj novi fitnes centar:</h3>
+    <form id="fcentar">
+        <label>Ime: </label><input type="text" id="ime" /><br />
+        <label>Adresa: </label><input type="text" id="adresa" /><br />
+        <label>Godina otvaranja: </label><input type="number" id="godina" /><br />
+        <label>Mesecna clanarina: </label><input type="number" id="mesecna" /><br />
+        <label>Godisnja clanarina: </label><input type="number" id="godisnja" /><br />
+        <label>Jednodnevni trening: </label><input type="number" id="jednodnevni" /><br />
+        <label>Jedan grupni trening: </label><input type="number" id="grupni" /><br />
+        <label>Personalni: </label><input type="number" id="personalni" /><br />
+        <input type="submit" value="Dodaj" id="submit"/>
+    </form><br/>
+    <h4>Da bi blokirali trenera potrebno je da unesete njegovo korisnicko ime:</h4>
+    <form id="forma">
+        <label>Korisnicko ime: </label><input type="text" id="polje" /><br />
+        <input type="submit" value="Izbrisi" id="predaj"/>
+    </form>
+    <button id="click">Nazad</button>
+</body>
+</html>

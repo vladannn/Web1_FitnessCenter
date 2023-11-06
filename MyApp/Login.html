@@ -1,0 +1,88 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            background-image: url("./slika.jpg");
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: cover;
+            filter: blur(0.2px);
+            color: black;
+            font-weight: bold;
+            text-align: center
+        }
+
+        a {
+            background-color: wheat;
+            color: black;
+            border: double;
+            font-weight: bold;
+            position: fixed;
+            left: 2px;
+            top: 2px
+        }
+        #submit{
+            background-color:wheat;
+            color:black;
+            font-weight:bold
+        }
+    </style>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="Scripts/jquery-3.3.1.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#forma').submit(function (e) {
+                e.preventDefault();
+                var username = $('#name').val();
+                let password = $('#password').val();
+
+                if (username.length === 0 || password.length === 0) {
+                    alert('Obavezno je da se popuni svako polje!');
+                    return;
+                }
+                var forma1 = $(this);
+                $.ajax({
+                    url: "api/register/Logovanje",
+                    type: "POST",
+                    data: forma1.serialize(),
+                    success: function (response) {
+                        if (response == null) {
+                            alert('Korisnik sa unetim podacima ne postoji! Pokusajte ponovo.');
+                        }
+                        else {
+                            if (response.Role === 'Owner') {
+                                alert('Korisnik koji se prijavio je vlasnik');
+                                window.location.href = "index.html?username=" + response.Username;
+                            }
+                            else if (response.Role === 'Coach') {
+                                alert('Korisnik koji se prijavio je trener')
+                                window.location.href = "index.html?username=" + response.Username;
+                            }
+                            else if (response.Role === 'Visitor') {
+                                alert('Korisnik koji se prijavio je posetilac');
+                                window.location.href = "index.html?username=" + response.Username;
+                            }
+                        }
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                });
+            });
+        });
+
+
+    
+    </script>
+</head>
+<body>
+    <h1>Prijava na sistem:</h1>
+    <form id="forma">
+        <label>Korisnicko ime: </label><input type="text" id="name" name="name" /><br /><br />
+        <label>Sifra: </label><input type="password" id="password" name="password" /><br /><br />
+        <input type="submit" value="Prijavi se" id="submit" />
+    </form><br />
+    <a href="index.html" class="click">Nazad</a>
+</body>
+</html>

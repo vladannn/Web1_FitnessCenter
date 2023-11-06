@@ -1,0 +1,105 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            background-image: url("./slika.jpg");
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: cover;
+            filter: blur(0.2px);
+            font-weight: bold;
+            text-align: center;
+            color: black
+        }
+
+        a {
+            color: black;
+            font-family: Century;
+            border: double;
+            align-content: center;
+            position: fixed;
+            left: 2px;
+            top: 2px
+        }
+
+        h1 {
+            text-align: center;
+            font-weight: bold
+        }
+
+        input[type=submit] {
+            background: center;
+            color: black;
+            font-weight: bold
+        }
+    </style>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="Scripts/jquery-3.3.1.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var niz = new Array();
+            niz = location.search.split('&');
+            var korisnickoIme = niz[0].substring(10);
+            var id = niz[1].substring(0);
+            $('.click').click(function (e) {
+                e.preventDefault();
+                location.href = "index.html?username=" + korisnickoIme;
+            });
+            $('#forma').submit(function (e) {
+                e.preventDefault();
+                let name = $('#name').val();
+                let lastname = $('#lastname').val();
+                var username = $('#username').val();
+                var email = $('#email').val();
+                let password = $('#password').val();
+                let datetime = $('#datetime').val();
+                let gender = $('#gender').val();
+                //alert(id);
+                if (name.length === 0 || lastname.length === 0 || username.length === 0 || email.length === 0 || password.length === 0 || datetime.length === 0 || gender.length === 0) {
+                    alert('Obavezno je da se popuni svako polje!');
+                    return;
+                }
+                var forma1 = $(this);
+                $.ajax({
+                    url: "api/vlasnik/DodavanjeTrenera",
+                    type: "POST",
+                    data: { 'name': name, 'lastname': lastname, 'username': username, 'email': email, 'password': password, 'datetime': datetime, 'gender': gender, 'id': id, 'korIme': korisnickoIme },
+                    success: function (response) {
+                        if (response === false) {
+                            alert('Korisnik sa unetim korisnickim imenom vec postoji!');
+                            $('#username').val('');
+                            $('#email').val('');
+                            return;
+                        }
+                        alert('Uspesno ste registrovali trenera');
+                        window.location.href = "index.html?username=" + korisnickoIme;
+
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                });
+            });
+        });
+
+    </script>
+</head>
+<body>
+    <h1>Registracija</h1>
+    <form id="forma">
+        <label>Ime: </label><input type="text" name="name" id="name" /><br /><br />
+        <label>Prezime: </label><input type="text" name="lastname" id="lastname" /><br /><br />
+        <label>Korisnicko ime: </label><input type="text" name="username" id="username" /><br /><br />
+        <label>Email: </label><input type="email" name="email" id="email" /><br /><br />
+        <label>Sifra: </label><input type="password" name="password" id="password" /><br /><br />
+        <label>Datum rodjenja: </label><input type="date" name="datetime" id="datetime" /><br /><br />
+        <label>Pol: </label><select name="gender" id="gender">
+            <option>Muski</option>
+            <option>Zenski</option>
+        </select><br /><br />
+        <input type="submit" value="Registruj se" id="submit" />
+    </form>
+    <a href="index.html" class="click">Nazad</a>
+</body>
+</html>

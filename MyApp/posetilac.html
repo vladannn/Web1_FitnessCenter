@@ -1,0 +1,283 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            background-image: url("./slika.jpg");
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: cover;
+            filter: blur(0.2px);
+            font-weight: bold;
+        }
+
+        #click {
+            background: center;
+            font-weight: bold;
+            position: fixed;
+            left: 2px;
+            top: 2px
+        }
+
+        #content{
+            text-align:center;
+        }
+
+        h3{
+            text-align:center
+        }
+
+        button {
+            background: center;
+            font-weight: bold;
+            text-align:left
+        }
+
+        #submit {
+            background: center;
+            color: black;
+            font-weight: bold
+        }
+    </style>
+    <meta charset="utf-8" />
+    <title></title>
+    <script src="Scripts/jquery-3.3.1.js"></script>
+    <script type="text/javascript">
+        var korisnickoIme = location.search.substring(10);
+        $(document).ready(function () {
+            prikazGT();
+
+            $('#sort1').click(function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "api/posetilac/NazivRastuce",
+                    type: "GET",
+                    data: { 'koIme': korisnickoIme },
+                    success: function (response) {
+                        if (response === null) {
+                            $('#content').html('<p>Nema podataka!</p>');
+                        } else {
+                            alert('Rastuce po nazivu!');
+                            kreiranjeTabele(response);
+                        }
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                })
+            });
+
+            $('#sort2').click(function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "api/posetilac/NazivOpadajuce",
+                    type: "GET",
+                    data: { 'koIme': korisnickoIme },
+                    success: function (response) {
+                        if (response === null) {
+                            $('#content').html('<p>Nema podataka!</p>');
+                        } else {
+                            alert('Opadajuce po nazivu!');
+                            kreiranjeTabele(response);
+                        }
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                })
+            });
+
+            $('#sort3').click(function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "api/posetilac/TipRastuce",
+                    type: "GET",
+                    data: { 'koIme': korisnickoIme },
+                    success: function (response) {
+                        if (response === null) {
+                            $('#content').html('<p>Nema podataka!</p>');
+                        } else {
+                            alert('Rastuce po tipu!');
+                            kreiranjeTabele(response);
+                        }
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                })
+            });
+
+            $('#sort4').click(function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "api/posetilac/TipOpadajuce",
+                    type: "GET",
+                    data: { 'koIme': korisnickoIme },
+                    success: function (response) {
+                        if (response === null) {
+                            $('#content').html('<p>Nema podataka!</p>');
+                        } else {
+                            alert('Opadajuce po tipu!');
+                            kreiranjeTabele(response);
+                        }
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                })
+            });
+
+            $('#sort5').click(function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "api/posetilac/DatumRastuce",
+                    type: "GET",
+                    data: { 'koIme': korisnickoIme },
+                    success: function (response) {
+                        if (response === null) {
+                            $('#content').html('<p>Nema podataka!</p>');
+                        } else {
+                            alert('Rastuce po datumu odrzavanja!');
+                            kreiranjeTabele(response);
+                        }
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                })
+            });
+
+            $('#sort6').click(function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "api/posetilac/DatumOpadajuce",
+                    type: "GET",
+                    data: { 'koIme': korisnickoIme },
+                    success: function (response) {
+                        if (response === null) {
+                            $('#content').html('<p>Nema podataka!</p>');
+                        } else {
+                            alert('Opadajuce po datumu odrzavanja!');
+                            kreiranjeTabele(response);
+                        }
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                })
+            });
+
+            $('#forma').submit(function (e) {
+                e.preventDefault();
+                let ime = $('#ime').val();
+                let tip = $('#tip').val();
+                let fitnes = $('#fitnes').val();
+
+                if (ime.length === 0 && tip === '(empty)' && fitnes.length===0) {
+                    alert('Sva polja moraju biti popunjena!');
+                    return;
+                }
+
+                $.ajax({
+                    url: "api/posetilac/Pretraga",
+                    type: "GET",
+                    data: { 'koIme': korisnickoIme, 'ime': ime, 'tip': tip, 'fitnes': fitnes },
+                    success: function (response) {
+                        if (response === null) {
+                            $('#content').html('<p>Nema rezultata</p>');
+                        } else {
+                            kreiranjeTabele(response);
+                        }
+                    }, error: function (xhr, ajaxOptions, thrownError) {
+                        alert('Error: ' + xhr.status);
+                    }
+                })
+            });
+
+            $('#click').click(function (e) {
+                window.location.href = "index.html?username=" + korisnickoIme;
+            });
+        });
+
+        function prikazGT() {
+            $.ajax({
+                url: "api/posetilac/RanijiTreninzi",
+                type: "GET",
+                data: { "koIme": korisnickoIme },
+                success: function (response) {
+                    if (response === null) {
+                        $('#content').html('<p>Nema rezultata. Korisnik nije pre ucestvovao na grupnim treninzima!</p>');
+                    } else {
+                        kreiranjeTabele(response);
+                    }
+                }, error: function (xhr, ajaxOptions, thrownError) {
+                    alert('Error: ' + xhr.status);
+                }
+            });
+        };
+        function kreiranjeTabele(response) {
+            let tableFitness = '<table align="center" border="1">';
+            tableFitness += '<tr><th>Ime</th><th>Tip treninga</th><th>Teretana</th><th>Trajanje</th><th>Datum i vreme</th><th>Maksimalan broj clanova</th><th>Broj prijavljenih clanova</th></tr>';
+            for (elemnt in response) {
+                let uloga = '';
+                if (response[elemnt].TrainingType === 'Yoga') {
+                    uloga = 'Yoga';
+                }
+                else if (response[elemnt].TrainingType === 'LessMillsTone') {
+                    uloga = 'Less Mills Tone';
+                }
+                else if (response[elemnt].TrainingType === 'BodyPump') {
+                    uloga = 'Body Pump';
+                }
+                let numberOfVisitors = response[elemnt].Users;
+                if (numberOfVisitors === null) {
+                    numberOfVisitors = 0;
+                }
+                else {
+                    numberOfVisitors = numberOfVisitors.length;
+                }
+                let date = response[elemnt].DateTime;
+                let obj = date.split("T");
+                let first = obj[0];
+                let second = obj[1];
+                let partsOfDate = first.split("-");
+                let year = partsOfDate[0];
+                let month = partsOfDate[1];
+                let day = partsOfDate[2];
+                let obj1 = second.split(":");
+                let hrs = obj1[0];
+                let min = obj1[1];
+                let dateAndTime = day + "/" + month + "/" + year + "   " + hrs + ":" + min + "h";
+                let finess = '<td>' + response[elemnt].Name + '</td>';
+                finess += '<td>' + uloga + '</td>';
+                finess += '<td>' + response[elemnt].Place.Name + '</td>';
+                finess += '<td>' + response[elemnt].Duration + '</td>';
+                finess += '<td>' + dateAndTime + '</td>';
+                finess += '<td>' + response[elemnt].MaxNumber + '</td>';
+                finess += '<td>' + numberOfVisitors + '</td>';
+                tableFitness += '<tr>' + finess + '</tr>';
+            }
+            tableFitness += '</table>';
+            $('#content').html(tableFitness);
+        };
+    </script>
+</head>
+<body>
+    <h3>Vasi raniji treninzi: </h3>
+    <div id="content"></div><br />
+    <h4>Pretraga</h4>
+    <form id="forma">
+        <label>Naziv grupnog treninga</label><input type="text" id="ime" /><br />
+        <label>Tip treninga</label>
+        <select name="tip" id="tip">
+            <option>Yoga</option>
+            <option>Less Mills Tone</option>
+            <option>Body Pump</option>
+            <option selected>(empty)</option>
+        </select><br />
+        <label>Naziv fitnes centra</label><input type="text" id="fitnes" /><br />
+        <input type="submit" id="submit" value="Pretrazi" />
+    </form><br />
+    <button id="sort1">Sortiraj po nazivu rastuce</button><br />
+    <button id="sort2">Sortiraj po nazivu opadajuce</button><br />
+    <button id="sort3">Sortiraj po tipu treninga rastuce</button><br />
+    <button id="sort4">Sortiraj po tipu treninga opadajuce</button><br />
+    <button id="sort5">Sortiraj po datumu odrzavanja rastuce</button><br />
+    <button id="sort6">Sortiraj po datumu odrzavanja opadajuce</button><br />
+    <button id="click">Nazad</button>
+</body>
+</html>
